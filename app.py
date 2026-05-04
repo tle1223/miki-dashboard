@@ -69,6 +69,28 @@ if file:
         st.metric("Total Au Actual", round(df_filtered_addau["Au"].sum(), 2))
 
     # -----------------------------
+    # GRAPH SUMMARY BY TANK
+    # -----------------------------
+    st.subheader("📊 Au Formal vs Au Actual (by Tank)")
+
+    df_sum_tank_formal = df_filtered_plating.groupby("บ่อชุบ", as_index=False).agg({"Au  Formal":"sum"})
+    df_sum_tank_actual = df_filtered_addau.groupby("Tank", as_index=False).agg({"Au":"sum"})
+    df_sum_tank_actual = df_sum_tank_actual.rename(columns={"Au":"Au Actual", "Tank":"บ่อชุบ"})
+
+    df_compare_tank = pd.merge(df_sum_tank_formal, df_sum_tank_actual, on="บ่อชุบ", how="outer")
+    df_compare_tank = df_compare_tank.sort_values("Au Actual", ascending=False)
+
+    fig_tank = px.bar(
+        df_compare_tank,
+        x="บ่อชุบ",
+        y=["Au  Formal","Au Actual"],
+        barmode="group",
+        text_auto=True,
+        title="Au Formal vs Au Actual per Tank (Sorted by Au Actual)"
+    )
+    st.plotly_chart(fig_tank, use_container_width=True)
+
+    # -----------------------------
     # GRAPH COMPARISON (Formal vs Actual - เฉพาะกราฟแท่ง)
     # -----------------------------
     st.subheader("📊 Au Formal vs Au Actual (by Month)")
@@ -93,7 +115,7 @@ if file:
     st.plotly_chart(fig_bar, use_container_width=True)
 
     # -----------------------------
-    # GRAPH FROM ADD AU SHEET (Vertical bar per Remark + แสดงค่าบนแท่ง + เรียงเดือน)
+    # GRAPH FROM ADD AU SHEET
     # -----------------------------
     st.subheader("📊 Au Actual Usage by Tank & Remark (Add Au Sheet)")
 
@@ -120,7 +142,7 @@ if file:
     st.plotly_chart(fig_addau, use_container_width=True)
 
     # -----------------------------
-    # TOP 5 MIKI CODE (Plating Sheet + Dropdown เลือกเดือน + Drill-down Tank)
+    # TOP 5 MIKI CODE
     # -----------------------------
     st.subheader("🏆 Top 5 Miki Code by Au Formal Usage")
 
@@ -143,7 +165,6 @@ if file:
     )
     st.plotly_chart(fig_miki, use_container_width=True)
 
-    # เลือก Miki Code เพื่อดูรายละเอียด Tank
     selected_miki_detail = st.selectbox("เลือก Miki Code เพื่อดูรายละเอียด Tank", df_miki_top5["Miki Code"].tolist())
 
     df_detail = df_filtered_plating[df_filtered_plating["Miki Code"] == selected_miki_detail]
@@ -152,7 +173,6 @@ if file:
     st.subheader(f"📋 รายละเอียด Tank ของ Miki Code: {selected_miki_detail}")
     st.dataframe(df_detail_group)
 
-    # กราฟแท่งย่อยแสดง Tank ของ Miki Code ที่เลือก
     fig_detail = px.bar(
         df_detail_group,
         x="บ่อชุบ",
