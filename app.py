@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(layout="wide")
-st.title("📊 Au Formal vs Au Actual Dashboard")
+st.title("📊Dashboard Maker")
 
 @st.cache_data
 def load_data(file):
